@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Cloud Resume Challenge
+  
+  CloudFormation Template to set up an OIDC Provider and an IAM Role for GitHub Actions
+  to assume when deploying the backend and frontend.
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Description: GitHub organization or username
+    Default: sumanthlagadapati
+  RepositoryName:
+    Type: String
+    Description: GitHub repository name
+    Default: cloud-resume-challenge
+  OIDCProviderArn:
+    Type: String
+    Description: >
+      Arn for the GitHub OIDC Provider. 
+      If you haven't created one yet, leave this blank and one will be created.
+      (Note: AWS only allows one GitHub OIDC provider per account, so if you already have one, pass the ARN here.)
+    Default: ""
+
+Conditions:
+  CreateOIDCProvider: !Equals [!Ref OIDCProviderArn, ""]
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1 # GitHub's thumbprint
+        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GitHubActions-CloudResumeRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !If 
+                - CreateOIDCProvider
+                - !Ref GitHubOidcProvider
+                - !Ref OIDCProviderArn
+            Condition:
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/${RepositoryName}:*
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+      # VERY permissive policy for SAM deployment and S3/CloudFront.
+      # In a real environment, you should scope this down significantly.
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess 
+      Tags:
+        - Key: Project
+          Value: CloudResume
+
+Outputs:
+  GitHubActionsRoleArn:
+    Value: !GetAtt GitHubActionsRole.Arn
+    Description: The ARN of the IAM Role to add as an Action Secret (AWS_ROLE_ARN)

@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Cloud Resume Challenge
+  
+  SAM Template for the backend of the Cloud Resume Challenge
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 128
+    Runtime: python3.9
+
+Resources:
+  # DynamoDB Table for visitor count
+  VisitorCountTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: CloudResumeVisitorCount
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: CloudResume
+
+  # Lambda Function
+  VisitorCounterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/
+      Handler: visitor_counter.lambda_handler
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref VisitorCountTable
+      # Using Function URL instead of API Gateway for simplicity
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - "*" # Change this to your custom domain once set up
+          AllowMethods:
+            - GET
+            - POST
+            - OPTIONS
+          AllowHeaders:
+            - Content-Type
+      Policies:
+        # Give Lambda permission to update and get items from the specific table
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitorCountTable
+      Tags:
+        Project: CloudResume
+
+Outputs:
+  # Output the Function URL to use in frontend JS
+  VisitorCounterApiUrl:
+    Description: "API Endpoint URL for Visitor Counter function"
+    Value: !GetAtt VisitorCounterFunctionUrl.FunctionUrl
+  VisitorCounterFunctionArn:
+    Description: "Visitor Counter Lambda Function ARN"
+    Value: !GetAtt VisitorCounterFunction.Arn
+  VisitorCountTableName:
+    Description: "DynamoDB Table Name"
+    Value: !Ref VisitorCountTable

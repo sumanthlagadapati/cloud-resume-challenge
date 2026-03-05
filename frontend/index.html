@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sumanth Lagadapati | Cloud Resume</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container text-center">
+            <h1>Sumanth Lagadapati</h1>
+            <p class="subtitle">Cloud & FinOps Professional</p>
+            <div class="social-links">
+                <a href="#" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <a href="#" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>About Me</h2>
+            <p>I am a FinOps professional who bridges the gap between financial accountability and cloud engineering. I
+                recently completed the Cloud Resume Challenge to build hands-on architectural experience with serverless
+                computing, infrastructure as code, and CI/CD pipelines.</p>
+        </section>
+
+        <section class="card">
+            <h2>Experience</h2>
+            <div class="job">
+                <h3>Cloud/FinOps Analyst</h3>
+                <p class="company">Company Name <span>• 2021 - Present</span></p>
+                <ul>
+                    <li>Analyzed cloud infrastructure to identify cost optimization opportunities.</li>
+                    <li>Collaborated with DevOps and Engineering to implement cost-saving measures.</li>
+                    <li>Developed comprehensive billing reports and dashboards.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>The Cloud Resume Challenge</h2>
+            <p>This very website was built entirely using AWS Serverless technologies:</p>
+            <ul>
+                <li><strong>Frontend:</strong> Hosted in S3, distributed globally via CloudFront.</li>
+                <li><strong>Backend:</strong> Python Lambda Function URL interacting with DynamoDB.</li>
+                <li><strong>Infrastructure:</strong> Provisioned using AWS CloudFormation (IaC).</li>
+                <li><strong>CI/CD:</strong> Fully automated deploys via GitHub Actions and OIDC.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p>You are visitor number <span id="visitor-count">...</span></p>
+            <p class="small">Built for the Cloud Resume Challenge.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
