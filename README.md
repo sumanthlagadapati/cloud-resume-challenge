@@ -110,6 +110,66 @@ Built with ☁️ AWS, 🐍 Python, ☕ stubbornness, and the willingness to del
 | **GitHub Actions** | CI/CD pipeline |
 | **AWS CLI** | Local deployment and debugging |
 
+---
+
+## 🚀 Deployment Instructions
+
+### Frontend Deployment (S3 + CloudFront)
+
+1. **Build your frontend**
+   - Ensure your static files (`index.html`, `styles.css`, `script.js`, and `resume.pdf`) are ready in the `frontend/` directory.
+
+2. **Deploy to S3**
+   - Create an S3 bucket (enable static website hosting).
+   - Upload all files from `frontend/` to the bucket root.
+   - Set the bucket policy to allow public read access for static hosting.
+
+3. **Set up CloudFront**
+   - Create a CloudFront distribution with your S3 bucket as the origin.
+   - Attach an AWS Certificate Manager (ACM) TLS certificate for HTTPS.
+   - (Optional) Set up a custom domain in Route 53 and point it to CloudFront.
+
+4. **Update API Endpoint**
+   - In `frontend/script.js`, set `apiUrl` to your deployed Lambda Function URL.
+
+5. **Invalidate CloudFront Cache** (after updates)
+   - Invalidate the distribution to force refresh of updated files.
+
+### Backend Deployment (Lambda + DynamoDB)
+
+1. **Deploy DynamoDB Table**
+   - Create a DynamoDB table (e.g., `CloudResumeVisitorCount`) with primary key `id` (string).
+   - Add an item: `{ "id": "visitors", "count_value": 0 }`
+
+2. **Deploy Lambda Function**
+   - Package `backend/visitor_counter.py` as a Lambda function (Python 3.x runtime).
+   - Set environment variables:
+     - `TABLE_NAME` = your DynamoDB table name
+     - (Optional) `EVENT_BUS_NAME` if using EventBridge for analytics
+   - Grant Lambda permissions for DynamoDB read/write and (if used) EventBridge put events.
+
+3. **Configure Lambda Function URL**
+   - Enable Lambda Function URL (or use API Gateway if preferred).
+   - Set CORS to allow your frontend domain.
+
+4. **Test the endpoint**
+   - Use `curl` or Postman to POST to the Lambda Function URL and verify visitor count increments.
+
+### Infrastructure as Code (Recommended)
+
+- Use the provided CloudFormation templates in `infrastructure/` to automate S3, CloudFront, Lambda, DynamoDB, and IAM setup.
+- Deploy with:
+  ```sh
+  aws cloudformation deploy --template-file infrastructure/template.yaml --stack-name cloudresume --capabilities CAPABILITY_NAMED_IAM
+  ```
+
+### CI/CD (GitHub Actions)
+
+- Automated deployment is set up via GitHub Actions workflows in `.github/workflows/`.
+- On push to `main`, the pipeline will build and deploy both frontend and backend using OIDC authentication (no stored AWS credentials).
+
+---
+
 ## 💰 Cost Analysis
 
 ### The Real Monthly Cost
